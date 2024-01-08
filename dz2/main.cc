@@ -460,8 +460,12 @@ std::shared_ptr<node> receive_task() {
 		return nullptr;
 	}
 
-	constexpr std::size_t BUF_SIZE{512};
-	std::vector<std::byte> bytes(BUF_SIZE);
+	int count;
+	if (MPI_Get_count(&status, MPI_BYTE, &count) != MPI_SUCCESS) {
+		throw std::runtime_error("failed to get count");
+	}
+
+	std::vector<std::byte> bytes(count);
 	if (MPI_Recv(bytes.data(), bytes.size(), MPI_BYTE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status) != MPI_SUCCESS) {
 		throw std::runtime_error("failed to receive a task");
 	}
